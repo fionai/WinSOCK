@@ -1,4 +1,8 @@
-﻿#ifndef WIN32_LEAN_AND_MEAN
+﻿// CLIENT
+
+
+
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 //это нужно, когда к проекту одновременно подключаются <WinSock2.h> и <Windows.h>
 #endif // WIN32_LEAN_AND_MEAN
