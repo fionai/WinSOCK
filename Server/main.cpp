@@ -1,5 +1,6 @@
 ﻿// SERVER
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -75,18 +76,23 @@ void main()
 	}
 
 	//6) обработка входящих соединений
-	SOCKET client_socket = accept(listen_socket, NULL, NULL); // ожидает запрос от клиента
+	SOCKADDR_IN client_addr;
+	int client_addrlen = sizeof(client_addr);
+	SOCKET client_socket = accept(listen_socket, (SOCKADDR*) & client_addr, &client_addrlen); // ожидает запрос от клиента
 	if (client_socket == INVALID_SOCKET)
 	{
 		cout << "Accept failed with error " << WSAGetLastError() << endl;
 		
 	}
+	cout << "CONNECTED ON " << inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port) << endl;
+
 
 	//7) получение и отправка данных
 	CHAR send_buffer[MTU] = "Hello Client!!!";
 	CHAR recv_buffer[MTU] = {};
 	do
 	{
+		ZeroMemory(recv_buffer, MTU);
 		iResult = recv(client_socket, recv_buffer, MTU, 0);
 		if (iResult > 0)
 		{

@@ -76,25 +76,33 @@ void main()
 
 	//отправка данных серверу
 	CHAR send_buffer[MTU] = "Hello Server!!!";
-	iResult = send(connect_socket,  send_buffer, strlen(send_buffer), NULL);
-	if (iResult == SOCKET_ERROR)
-	{
-		cout << "Send failed with error: " << WSAGetLastError() << endl;
-		closesocket(connect_socket);
-		WSACleanup();
-		return;
-	}
-	else cout << "Sent " << iResult << " bytes" << endl;
-
-	//Получение данных от сервера:
-	CHAR recv_buffer[MTU] = {};
 	do
 	{
-		iResult = recv(connect_socket, recv_buffer, MTU, NULL);
-		if (iResult > 0)  cout << recv_buffer << endl;
-		else if (iResult == 0) cout << "Nothing received from Server" << endl;
-		else cout << "Received failed with error: " << WSAGetLastError() << endl;
-	} while (iResult > 0);
+		iResult = send(connect_socket, send_buffer, strlen(send_buffer), NULL);
+		if (iResult == SOCKET_ERROR)
+		{
+			cout << "Send failed with error: " << WSAGetLastError() << endl;
+			closesocket(connect_socket);
+			WSACleanup();
+			return;
+		}
+		else cout << "Sent " << iResult << " bytes" << endl;
+
+		//Получение данных от сервера:
+		CHAR recv_buffer[MTU] = {};
+
+			iResult = recv(connect_socket, recv_buffer, MTU, NULL);
+			if (iResult > 0)  cout << recv_buffer << endl;
+			else if (iResult == 0) cout << "Nothing received from Server" << endl;
+			else cout << "Received failed with error: " << WSAGetLastError() << endl;
+
+
+			cout << "Введите сообщение: ";
+			SetConsoleCP(1251);
+			cin.getline(send_buffer, MTU);
+			SetConsoleCP(866);
+
+	} while (_stricmp(send_buffer, "exit") != 0);
 
 	//Разрываем tcp соединение
 	iResult = shutdown(connect_socket, SD_BOTH);
