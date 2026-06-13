@@ -75,9 +75,19 @@ void main()
 
 
 	//отправка данных серверу
-	CHAR send_buffer[MTU] = "Hello Server!!!";
+	CHAR send_buffer[MTU] = "exit";
 	iResult = send(connect_socket,  send_buffer, strlen(send_buffer), NULL);
-	if (iResult == SOCKET_ERROR)
+			///////////////////////BEV/////////////////////
+			if (send_buffer == "exit")
+			{
+				shutdown(connect_socket, SD_BOTH);
+				closesocket(connect_socket);
+				WSACleanup();
+				return;
+			}
+	else 
+			///////////////////////BEV/////////////////////
+				if (iResult == SOCKET_ERROR)
 	{
 		cout << "Send failed with error: " << WSAGetLastError() << endl;
 		closesocket(connect_socket);
@@ -91,7 +101,10 @@ void main()
 	do
 	{
 		iResult = recv(connect_socket, recv_buffer, MTU, NULL);
-		if (iResult > 0)  cout << recv_buffer << endl;
+		if (iResult > 0)
+		{
+			cout << recv_buffer << endl;
+		}
 		else if (iResult == 0) cout << "Nothing received from Server" << endl;
 		else cout << "Received failed with error: " << WSAGetLastError() << endl;
 	} while (iResult > 0);
