@@ -73,20 +73,11 @@ void main()
 	}
 	freeaddrinfo(target);
 
-
+	/*
 	//отправка данных серверу
-	CHAR send_buffer[MTU] = "exit";
+	CHAR send_buffer[MTU] = "Hello server";
 	iResult = send(connect_socket,  send_buffer, strlen(send_buffer), NULL);
-			///////////////////////BEV/////////////////////
-			if (send_buffer == "exit")
-			{
-				shutdown(connect_socket, SD_BOTH);
-				closesocket(connect_socket);
-				WSACleanup();
-				return;
-			}
-	else 
-			///////////////////////BEV/////////////////////
+	
 				if (iResult == SOCKET_ERROR)
 	{
 		cout << "Send failed with error: " << WSAGetLastError() << endl;
@@ -108,12 +99,57 @@ void main()
 		else if (iResult == 0) cout << "Nothing received from Server" << endl;
 		else cout << "Received failed with error: " << WSAGetLastError() << endl;
 	} while (iResult > 0);
+	*/
+
+	CHAR send_buffer[MTU] = {};
+	CHAR recv_buffer[MTU] = {};
+
+	while (true)
+	{
+		cout << "Enter message (or 'exit' to quit): ";
+		cin.getline(send_buffer, MTU);
+
+		// Отправляем команду серверу (включая 'exit', чтобы сервер тоже знал о закрытии)
+		iResult = send(connect_socket, send_buffer, strlen(send_buffer), NULL);
+		if (iResult == SOCKET_ERROR)
+		{
+			cout << "Send failed with error: " << WSAGetLastError() << endl;
+			break;
+		}
+
+		// Если ввели exit — выходим из цикла общения
+		if (_stricmp(send_buffer, "exit") == 0)
+		{
+			cout << "Connection closed" << endl;
+			break;
+		}
+
+		// Ожидаем ответ от сервера только если это не был exit
+		ZeroMemory(recv_buffer, MTU);
+		iResult = recv(connect_socket, recv_buffer, MTU - 1, NULL);
+
+		if (iResult > 0) 
+		{
+			cout << "Server response: " << recv_buffer << endl;
+		}
+		else if (iResult == 0) 
+		{
+			cout << "Connection closed by Server" << endl;
+			break;
+		}
+		else 
+		{
+			cout << "Receive failed with error: " << WSAGetLastError() << endl;
+			break;
+		}
+	}
+
 
 	//Разрываем tcp соединение
 	iResult = shutdown(connect_socket, SD_BOTH);
 	if (iResult != 0)
 	{
-		cout << "shutdown failed with error: " << WSAGetLastError << endl;
+		cout << "shutdown failed with error: " << WSAGetLastError() << endl;
 	}
 
 	// Освобождаем ресурсы Winsock;

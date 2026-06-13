@@ -25,11 +25,17 @@ void main()
 	INT iResult = 0;
 	// 1) init WinSOCK
 	WSADATA wsaData;
-	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	iResult =  WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (iResult != 0) 
+	{
+		cout << "WSAStartup failed with error: " << iResult << endl;
+		return;
+	}
+
 
 	//2) Параметры подключения
 	addrinfo hints;
-	addrinfo* binder;
+	addrinfo* binder = nullptr;
 	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
@@ -79,7 +85,9 @@ void main()
 	if (client_socket == INVALID_SOCKET)
 	{
 		cout << "Accept failed with error " << WSAGetLastError() << endl;
-		
+		closesocket(listen_socket);
+		WSACleanup();
+		return;
 	}
 
 	//7) получение и отправка данных
@@ -87,20 +95,31 @@ void main()
 	CHAR recv_buffer[MTU] = {};
 	do
 	{
-		iResult = recv(client_socket, recv_buffer, MTU, 0);
+		ZeroMemory(recv_buffer, MTU);
+		iResult = recv(client_socket, recv_buffer, MTU-1, 0);
+
+					
 		if (iResult > 0)
 		{
 			cout << iResult << " bytes received, Message: " << recv_buffer << endl;
+
+			if (_stricmp(recv_buffer, "exit") == 0)
+			{
+				cout << "Client send \"exit\". Closing connection." << endl;
+				break;
+			}
+
 			INT iSendResult = send(client_socket, send_buffer, strlen(send_buffer), 0);
 			if (iSendResult == SOCKET_ERROR)
 			{
 				cout << "Send failed with error " << WSAGetLastError() << endl;
 				closesocket(client_socket);
+				break;
 			}
 			else cout << iSendResult << " bytes send" << endl;
 		}
 		else if (iResult == 0) cout << "nothing received from client" << endl;
-		else cout << "Receive fsiled with error " << WSAGetLastError() << endl;
+		else cout << "Receive failed with error " << WSAGetLastError() << endl;
 	} while (iResult > 0);
 
 	//8) разрываем соединение с клиентом
@@ -111,4 +130,5 @@ void main()
 	//9)Release resources
 	closesocket(listen_socket);
 	WSACleanup();
+	cout << "Server closed" << endl;
 }
