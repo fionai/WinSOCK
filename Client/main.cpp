@@ -100,7 +100,7 @@ void main()
 	iResult = shutdown(connect_socket, SD_BOTH);
 	if (iResult != 0)
 	{
-		cout << "shutdown failed with error: " << WSAGetLastError << endl;
+		cout << "shutdown failed with error: " << WSAGetLastError() << endl;
 	}
 
 	// Освобождаем ресурсы Winsock;
