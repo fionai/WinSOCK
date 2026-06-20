@@ -89,11 +89,11 @@ void main()
 			WSACleanup();
 			return;
 		}
-		else cout << "Sent " << iResult << " bytes" << endl;
+		//else cout << "Sent " << iResult << " bytes" << endl;
 
 
 
-			cout << "Введите сообщение: ";
+			//cout << "Введите сообщение: ";
 			SetConsoleCP(1251);
 			cin.getline(send_buffer, MTU);
 			SetConsoleCP(866);

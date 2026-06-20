@@ -1,6 +1,7 @@
 ﻿// SERVER
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -27,7 +28,7 @@ INT g_ActiveClients = 0;
 
 INT GetClientIndex(DWORD dwThreadID);
 VOID Shift(INT index);
-VOID Broadcast(CHAR sz_message[]);
+VOID Broadcast(CHAR sz_message[], DWORD dwID);
 VOID ClientHandle(SOCKET client_socket);
 
 void main()
@@ -156,15 +157,25 @@ VOID Shift(INT index)
 	hThreads[MAX_CONNECTIONS - 1] = NULL;
 	g_ActiveClients--;
 }
-VOID Broadcast(CHAR sz_message[])
+VOID Broadcast(CHAR sz_message[], DWORD dwID)
 {
 	for (INT i = 0; i < g_ActiveClients; i++)
 	{
+		if (dwID != dwThreadIDs[i])
 		send(clients[i], sz_message, strlen(sz_message), 0);
 	}
 }
 VOID ClientHandle(SOCKET client_socket)
 {
+	SOCKADDR_IN client_address;
+	client_address.sin_family = AF_INET;
+	INT addrlen = sizeof(client_address);
+	getpeername(client_socket, (SOCKADDR*)&client_address, &addrlen);
+	CHAR sz_client_address[32] = {};
+	//CHAR sz_client_connected[32] = {};
+	sprintf(sz_client_address, "[%s:%d]:\t", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
+
+
 	INT iResult = 0;
 	//7) получение и отправка данных
 	CHAR send_buffer[MTU] = "Hello Client!!!";
@@ -172,11 +183,13 @@ VOID ClientHandle(SOCKET client_socket)
 	do
 	{
 		ZeroMemory(recv_buffer, MTU);
+		ZeroMemory(send_buffer, MTU);
 		iResult = recv(client_socket, recv_buffer, MTU, 0);
 		if (iResult > 0)
 		{
+			sprintf(send_buffer, "%s%s", sz_client_address, recv_buffer);
 			cout << iResult << " bytes received, Message: " << recv_buffer << endl;
-			Broadcast(recv_buffer);
+			Broadcast(send_buffer, GetCurrentThreadId());
 	/*		INT iSendResult = send(client_socket, send_buffer, strlen(send_buffer), 0);
 			if (iSendResult == SOCKET_ERROR)
 			{
