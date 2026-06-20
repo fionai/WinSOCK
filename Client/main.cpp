@@ -94,7 +94,7 @@ void main()
 	// Главный цикл отправки сообщений
 	do
 	{
-		cout << "Вы: ";
+		cout << "Я: ";
 		cin.getline(send_buffer, MTU);
 
 		// Если ввели exit — выходим и закрываем приложение
@@ -144,7 +144,7 @@ DWORD WINAPI Receive(LPVOID lpParam)
 		if (iResult > 0)
 		{
 			//  вывод строки, содержащей IP и порт от сервера, с переносом "Вы: "
-			cout << "\r" << recv_buffer << "\nВы: ";
+			cout << "\r" << recv_buffer << "\nЯ: ";
 		}
 		else if (iResult == 0)
 		{
