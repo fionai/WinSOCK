@@ -188,7 +188,7 @@ VOID ClientHandle(SOCKET client_socket)
 		if (iResult > 0)
 		{
 			sprintf(send_buffer, "%s%s", sz_client_address, recv_buffer);
-			cout << iResult << " bytes received, Message: " << recv_buffer << endl;
+			cout << iResult << " bytes received, Message: " << send_buffer << endl;
 			Broadcast(send_buffer, GetCurrentThreadId());
 	/*		INT iSendResult = send(client_socket, send_buffer, strlen(send_buffer), 0);
 			if (iSendResult == SOCKET_ERROR)
